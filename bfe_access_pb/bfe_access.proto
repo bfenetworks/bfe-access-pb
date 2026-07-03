@@ -1,0 +1,491 @@
+// Copyright (c) 2026 The BFE Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package bfe_access_pb;
+
+option go_package = "github.com/bfenetworks/bfe-access-pb";
+
+
+enum ProductID {
+    BFE   = 18; 
+}
+
+//------------------------------------------------------------------------------------------------
+// Bfe Log
+//------------------------------------------------------------------------------------------------
+enum BfeLogType {
+    Request = 0;	// log for http request
+    Session = 1;	// log for http session (i.e., http connection)
+}
+
+message BfeLog {
+	// always set to BFE
+    required ProductID product                     = 1;
+
+    // for BFE, it timestamp of request finish or session finish
+	// Unix time, the number of seconds elapsed since January 1, 1970 UTC
+    required uint64 timestamp                      = 2;
+
+    //   For request log, each http request is assigned one unique log id by go-bfe
+	//      if there is already "BFE_LOGID" in header, just use it
+	//   For session log, it is session id
+    required uint64 logid                          = 3;
+
+	// for request log:
+	//  - for none-error req, log_tag will be req_<product name>
+	//  - for error req, log_tag will be req_err_<product name>
+	//  - for error req, if product is empty, log tage will be req_err_bfe
+	// for session log, log_tag will be session_bfe
+	// 
+    optional string log_tag	= 26;  
+
+    //------------------------------------------------------------------
+    //The ID less than 128 is reserved for common fields.
+    //------------------------------------------------------------------
+
+	required BfeLogType log_type	= 200;
+	
+	optional RequestLog request_log	= 210;
+	optional SessionLog session_log	= 211;
+
+}
+
+// ApikeyTag represents a tag attached to an API Key
+message ApikeyTag {
+    optional string tagname  = 1;  // Tag name, e.g., "dep"
+    optional string tagvalue = 2;  // Tag value, e.g., "op"
+}
+
+// RateLimitHit represents a rate limit hit record
+message RateLimitHit {
+    optional string rate_limit_policy_id = 1;  // Rate limit policy ID, e.g., "rlp-0001"
+    optional string rate_limit_type      = 2;  // Rate limit type: tpm / rpm / concurrency
+    repeated string rule_names           = 3;  // List of triggered rule names, e.g., ["win2min","win10min"]
+}
+
+//------------------------------------------------------------------------------------------------
+// Request Log
+//------------------------------------------------------------------------------------------------
+message RequestLog {
+    //------------------------------------------------------------------
+    // basic info for request. (id: 1 - 40)
+    //------------------------------------------------------------------
+
+    // err info for request
+	// for successful request, err_code should be ""
+    required string err_code	= 3;
+    // additional error msg
+    required string err_msg		= 4;
+
+    // length of request header
+    optional uint32 req_header_len	= 5;
+    
+    // length of request body
+	// not implemented yet
+    optional uint32 req_body_len	= 6;
+
+    // session id, which this request belongs to
+    optional uint64 session_id		= 7;
+
+    // connection addr info
+	required ConnAddrInfo addr_info	= 8;
+
+    // the real source ip of user. 
+	// If req is directly from bgw, client_src_ip is equal to sock_src_ip;
+	// if req is from upper bfe cluster, client_src_ip is got from CLIENTIP in http header
+    required uint32 client_ip	= 9;
+	
+	reserved 10;
+
+	// sequence number of request in the session. start from 1
+	required uint32 req_num = 11;
+
+    reserved 12;
+
+    // client ip network type, 0: Ipv4, 1: Ipv6
+    optional NetType client_network = 13;
+
+    // if client ip is ipv6, set client ipaddr to client_ip6
+    optional string client_ip6 = 14;
+
+    reserved 15;
+
+    reserved 16;
+
+    //------------------------------------------------------------------
+    // info for request header (id: 41 - 60)
+    //------------------------------------------------------------------
+
+    // protocol: http1.0, http1.1, https, spdy, http2
+    required string proto			= 41;
+	
+    // HOST in header
+    required string header_host		= 42;
+
+    // origin uri, e.g., /hm.gif?cc=0&ck=1
+    optional string origin_uri		= 43;
+    
+    // final uri, e.g., /hm.gif?cc=0&ck=1
+	// If req is rewrited or decoded, final uri may be different to origin uri.
+	// If final uri is same to origin uri, final_uri is set to ""
+    optional string final_uri		= 44;
+
+    // Referrer in header
+    optional string referrer		= 45;
+
+    reserved 46;
+
+    // X-Forward-For
+    optional string x_forward_for	= 47;
+
+    // Accept-Language
+    optional string accept_language	= 48;
+
+    // Authorization
+    optional string authorization	= 49;
+
+    // User-Agent
+    optional string user_agent	= 50;
+
+    // transfer encoding of request
+    optional string transfer_encoding	= 51;
+
+    // method, GET, POST, PUT, etc
+    optional string method = 52;
+
+    // delegation, delegation domain name of request
+    optional string delegation = 53;
+
+    // Content-Type, currently it's only used by security team to analyze the security issue.
+    optional string content_type = 54;
+
+    // request headers we care
+    repeated HttpHeader req_headers = 55;
+
+    reserved 56;
+
+    // uid in header
+    optional string uid = 57;
+    
+    reserved 58;
+
+    //------------------------------------------------------------------
+    // info for cookie in request header (id: 61 - 90)
+    //------------------------------------------------------------------
+    // complete cookie in header. 
+    optional string cookie	= 61;
+
+    reserved 71;
+    reserved 72;
+    reserved 73;
+    reserved 74;
+
+    reserved 91;
+
+    //------------------------------------------------------------------
+    // info of find location (id: 101 - 150)
+    //------------------------------------------------------------------
+	
+	// name of product
+    optional string product	= 101;
+    
+    // cluster name
+    optional string cluster	= 102;
+    
+    // sub-cluster name
+    optional string sub_cluster	= 103;
+    
+	// backend info. If retry many times, it is backend of last retry
+	optional InstanceInfo backend_info = 104;
+
+	// times of retry
+    optional uint32 backend_retry	= 105;
+
+    reserved 106;
+    reserved 107;
+
+    reserved 108;
+
+    //------------------------------------------------------------------
+    // info of response (id: 151 - 200)
+    //------------------------------------------------------------------
+	
+    // http status code of response
+    optional uint32 res_status_code	= 151;
+
+    // length of response header
+    optional uint32 res_header_len	= 152;
+    
+    // length of response body
+    optional uint32 res_body_len	= 153;
+
+    // Content-Type in response header
+    optional string res_content_type	= 154;
+
+	// location in response, for res_status_code == 3xx
+	optional string res_location	= 155;
+
+	// transfer encoding of response
+	optional string res_transfer_encoding	= 156;
+
+    reserved 157;
+
+    // response headers we care
+    repeated HttpHeader res_headers = 158;
+
+    //------------------------------------------------------------------
+    // time (id: 201 - 250)
+    //------------------------------------------------------------------
+    
+    // time duration of request (in ms)
+	// start: start read request, end: finish send response
+    required uint32 all_time			= 201;
+    
+    // time duration of read request from client(in ms)
+	// start: start read request, end: finish read request
+    optional uint32 read_client_time	= 202;
+    
+    // time duration of serve request by cluster (in ms) (include retry time)
+	// start: connect to cluster, end: get response from cluster
+    optional uint32 cluster_serve_time	= 203;
+    
+    // time duration of serve request by backend (in ms) (if retry many times, it is last retry)
+	// start: connect to backend, end: get response from backend
+    optional uint32 backend_serve_time	= 204;
+
+    // time duration of write response to client(in ms)
+	// start: start send response to client, end: finish send response
+    optional uint32 write_client_time	= 205;
+
+    // time offset from start time of session (in ms)
+	// start: start of session, end: finish send response
+    optional uint32 session_offset_time	= 206;
+    
+    // time duration: connect backend time(in ms) 
+	// start: connect to backend, end: connection established or got an idle connection
+    // only record last connection time if request retry
+    optional uint32 connect_backend_time = 207;
+
+    // time proxy delay of serve request in bfe(in ms)
+    // start: after read http request, end: just before connect backend, for first invoke (retry may exist)
+    optional uint32 proxy_delay_time	= 208;
+	
+    //------------------------------------------------------------------
+    // reserved (id: 251 - 400)
+    //------------------------------------------------------------------
+    reserved 251 to 400;
+
+    //------------------------------------------------------------------
+    // reserved waf (id: 401 - 500)
+    //------------------------------------------------------------------
+    reserved 401 to 500;
+
+    //------------------------------------------------------------------
+    // reserved module info (id: 501 - 600)
+    //------------------------------------------------------------------
+    reserved 501 to 600;
+
+    //------------------------------------------------------------------
+    // reserved fields (id: 601 - 610)
+    //------------------------------------------------------------------
+	reserved 601 to 610;
+
+    //------------------------------------------------------------------
+    // AI Observability fields (id: 701 - 800)
+    //------------------------------------------------------------------
+    // API Key (extracted from Authorization header)
+    optional string ai_apikey = 701;
+
+    // API Key attached tags list, e.g., [{"tagname":"dep","tagvalue":"op"}, {"tagname":"team","tagvalue":"bfe"}]
+    repeated ApikeyTag ai_apikeytags = 702;
+
+    // Original model name requested by client
+    optional string ai_requested_model = 703;
+
+    // Target model name actually routed by gateway
+    optional string ai_mapped_model = 704;
+
+    // Whether it is a streaming response
+    optional bool ai_stream = 705;
+
+    // Input token count
+    optional int64 ai_prompt_tokens = 706;
+
+    // Output token count
+    optional int64 ai_output_tokens = 707;
+
+    // Total token consumption
+    optional int64 ai_total_tokens = 708;
+
+    // Time to first token TTFT (microseconds), only for streaming requests
+    optional int64 ai_ttft_us = 709;
+
+    // Time per output token TPOT (microseconds), calculated when output_tokens > 0
+    optional int64 ai_tpot_us = 710;
+
+    // Rate limit hit list
+    repeated RateLimitHit ai_rate_limit_hits = 711;
+
+    // Auth/Authorization rejection reason
+    optional string ai_auth_reject_reason = 712;
+
+    // List of rejected Quota Plan IDs
+    repeated string ai_auth_reject_quota_plans = 713;
+
+}
+
+// info for a service instance
+message InstanceInfo {
+	// ip address
+	required uint32 ip_addr	= 1;
+	// port. there is no uint16 in pb
+	required uint32 port	= 2;
+}
+
+//------------------------------------------------------------------------------------------------
+// Session Log
+//------------------------------------------------------------------------------------------------
+message SessionLog {
+    //------------------------------------------------------------------
+    // basic info for session. (id: 1 - 40)
+    //------------------------------------------------------------------
+
+    // err code for session
+	// for successful session, err_code should be ""
+    required string err_code	= 2;
+    // additional error msg
+    required string err_msg		= 3;
+
+    // number of requests served in this session/connection
+    required uint32 req_num		= 4;
+
+    // total bytes read from client socket
+	// only with header len, no body len
+    required uint32 read_len	= 5;
+
+    // total bytes write to client socket
+	// not implement yet
+    required uint32 write_len	= 6;
+	
+	// connection addr info
+	required ConnAddrInfo addrInfo	= 7;
+
+    // protocol: http, https, spdy, http2
+    optional string proto			= 8;
+	
+    optional string product	= 9;
+
+    //------------------------------------------------------------------
+    // time info for session. (id: 41 - 50)
+    //------------------------------------------------------------------
+
+    // timestamp of session start
+	// Unix time, the number of seconds elapsed since January 1, 1970 UTC
+    required uint64 start_time	= 41;
+
+    // time duration of session (in ms)
+    required uint32 all_time	= 42;
+
+    // smoothed round tripper time between src sock ip and bfe(in ms)
+    optional uint32 rtt		= 43;
+
+    // Syn Rtt on l4 gateway
+    optional uint32 synRtt  = 44;
+
+    //------------------------------------------------------------------
+    // info for tcp optimization. (id: 51 - 60)
+    //------------------------------------------------------------------
+
+    reserved 51;
+
+    //------------------------------------------------------------------
+    // tls/ssl info for session (id: 101 - 150)
+    //------------------------------------------------------------------
+    // tls/ssl version
+    optional uint32 tls_version = 101;
+
+    // tls/ssl cipher suite
+    optional uint32 cipher_suite = 102;
+
+    // using tls/ssl session resume 
+    optional bool session_resume = 103;
+
+    // using ocsp stapling
+    optional bool ocsp_staple = 104;
+
+    // tls/ssl handshake duration (in ms)
+    optional uint32 handshake_time = 105;
+
+    // tls/ssl cert common name
+    optional string tls_cert_common_name = 106;
+
+    // tls/ssl cert chain id
+    optional string tls_cert_chain_id = 107;
+
+    // tls/ssl handshake failure type of reason
+    optional LostType lost_type = 108;
+    
+    //------------------------------------------------------------------
+    // module info (id: 201 - 300)
+    //------------------------------------------------------------------
+    
+    // reserved for req limit
+    reserved 201; 
+    reserved 202;
+    reserved 203;
+    
+}
+
+//------------------------------------------------------------------------------------------------
+// connection addr info, used in both RequestLog and SessionLog
+//
+// all ip addr is packed in uint32, e.g., 1.2.3.4 to 0x01020304
+//------------------------------------------------------------------------------------------------
+message ConnAddrInfo {
+    // ip addr of bfe server which process this request
+    required uint32 bfe_ip			= 1;
+
+    // source ip got from socket. 
+    required uint32 sock_src_ip		= 2;
+
+    // whether sock_src_ip is in list of trust ip. 
+    // It it is, src_ip_client is got from CLIENTIP in http header
+    required bool is_trust_src_ip	= 3;
+
+    // vip where this request is destined for.
+	// for some vip, this feature may be disabled (i.e., vip info is not accessable)
+	// for traffic from trust ip, vip is also useless
+    optional uint32 vip				= 4;
+    // if vip is ipv6, then set vip6.
+    optional string vip6            = 5;
+}
+
+// HTTP request or response header
+message HttpHeader {
+    required string key = 1;
+    required string value = 2;
+}
+
+enum NetType {
+    Ipv4 = 0;
+    Ipv6 = 1;  
+}
+
+enum LostType {
+    Unknown = 0;
+    Bfe = 1;
+    NotBfe = 2;
+}
