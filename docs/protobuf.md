@@ -150,6 +150,7 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 | `ai_image_count` | `int64` | 785 | 图像生成模式下生成的图像张数 |
 | `ai_image_input_tokens` | `int64` | 786 | 图片输入 Token 数，已包含在 `ai_input_tokens` 中 |
 | `ai_video_count` | `int64` | 787 | 视频生成模式下生成的视频数量 |
+| `ai_cache_write_1h_tokens` | `int64` | 788 | 1h TTL 缓存写入 Token 数，已包含在 `ai_cache_write_tokens` 中 |
 | `ai_route_rule_hits` | `repeated AIRouteRuleHit` | 801 | 命中的 AI 路由规则列表 |
 | `ai_cluster_key_names` | `repeated ClusterKeyName` | 802 | 请求处理过程中尝试过的 (cluster, key) 列表 |
 | `ai_auth_hit_quota_plans` | `repeated string` | 841 | 正常请求时命中的 Quota Plan ID 列表 |
