@@ -5,6 +5,21 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.6]
+
+### Added
+
+- Add 1h-TTL cache write token metering field to `RequestLog`:
+  - `ai_cache_write_1h_tokens` (field `788`)
+
+This optional field records the number of cache write tokens with a 1-hour TTL, included in `ai_cache_write_tokens`. It supports cache billing where 1h-TTL cache writes are priced separately from 5-minute-TTL writes (e.g., Anthropic extended cache TTL).
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add `ai_cache_write_1h_tokens` field (788).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document field 788.
+
 ## [v0.3.5]
 
 ### Added

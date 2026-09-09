@@ -396,6 +396,9 @@ message RequestLog {
     // Number of generated videos (video_generation mode)
     optional int64 ai_video_count = 787;
 
+    // Number of 1h-TTL cache write tokens (included in ai_cache_write_tokens)
+    optional int64 ai_cache_write_1h_tokens = 788;
+
     // 801 - 840: routing, transformation and plugins
     // Hit AI routing rules
     repeated AIRouteRuleHit ai_route_rule_hits = 801;
