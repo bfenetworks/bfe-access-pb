@@ -399,6 +399,12 @@ message RequestLog {
     // Number of 1h-TTL cache write tokens (included in ai_cache_write_tokens)
     optional int64 ai_cache_write_1h_tokens = 788;
 
+    // AI cache (mod_ai_cache) status: hit / miss / skip, empty if cache not enabled
+    optional string ai_cache_status = 789;
+
+    // AI cache key (mod_ai_cache), only logged when debug enabled; empty by default
+    optional string ai_cache_key = 790;
+
     // 801 - 840: routing, transformation and plugins
     // Hit AI routing rules
     repeated AIRouteRuleHit ai_route_rule_hits = 801;
