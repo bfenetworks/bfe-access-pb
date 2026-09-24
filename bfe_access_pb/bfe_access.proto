@@ -416,6 +416,35 @@ message RequestLog {
     // List of hit Quota Plan IDs for successful requests
     repeated string ai_auth_hit_quota_plans = 841;
 
+    // 842 - 860: traffic mirroring (mod_traffic_mirror)
+    // Whether the request was mirrored to a shadow cluster
+    optional bool mirror_hit = 842;
+
+    // Mirror target cluster name, e.g., "cluster_shadow_v2"
+    optional string mirror_cluster = 843;
+
+    // Mirror response status code; empty in phase 1 (async mirror results are
+    // reported via Prometheus, not written back to the access log)
+    optional int32 mirror_status = 844;
+
+    // Mirror request total latency (microseconds)
+    optional int64 mirror_latency_us = 845;
+
+    // Mirror time to first byte (microseconds, approximate TTFT)
+    optional int64 mirror_ttfb_us = 846;
+
+    // Mirror response usage.prompt_tokens parsed while draining the response
+    optional int32 mirror_prompt_tokens = 847;
+
+    // Mirror response usage.completion_tokens parsed while draining the response
+    optional int32 mirror_completion_tokens = 848;
+
+    // Mirror response finish_reason, e.g., stop / length / content_filter / error
+    optional string mirror_finish_reason = 849;
+
+    // Mirror response OpenAI error (type/code), truncated
+    optional string mirror_error = 850;
+
 }
 
 // info for a service instance

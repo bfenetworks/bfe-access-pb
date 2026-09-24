@@ -5,6 +5,29 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.8]
+
+### Added
+
+- Add traffic mirroring fields to `RequestLog`:
+  - `mirror_hit` (field `842`)
+  - `mirror_cluster` (field `843`)
+  - `mirror_status` (field `844`)
+  - `mirror_latency_us` (field `845`)
+  - `mirror_ttfb_us` (field `846`)
+  - `mirror_prompt_tokens` (field `847`)
+  - `mirror_completion_tokens` (field `848`)
+  - `mirror_finish_reason` (field `849`)
+  - `mirror_error` (field `850`)
+
+These optional fields record the `mod_traffic_mirror` traffic mirroring (shadow traffic) outcome of a request: `mirror_hit` and `mirror_cluster` are set synchronously when a request is selected for mirroring; `mirror_status`, latency/TTFB, and the parsed `usage` / `finish_reason` / OpenAI error fields are reserved for async mirror results.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add traffic mirroring fields (842-850).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document fields 842-850; split the 841-880 range into quota-plan hit (841), traffic mirroring (842-860), and security/privacy reservation (861-880).
+
 ## [v0.3.7]
 
 ### Added
