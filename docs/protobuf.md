@@ -119,7 +119,9 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 | 714 - 760 | 模型与请求基础信息（model、provider、stream、retry、mode 等） |
 | 761 - 800 | Token、成本、Cache、Audio 与 Image 计量 |
 | 801 - 840 | 路由、转换与插件 |
-| 841 - 880 | 安全、合规与隐私 |
+| 841 | 安全、合规与隐私（Quota Plan 命中） |
+| 842 - 860 | 流量镜像（mod_traffic_mirror） |
+| 861 - 880 | 安全、合规与隐私（预留） |
 | 881 - 900 | 厂商扩展与预留 |
 
 | 字段 | 类型 | 编号 | 说明 |
@@ -156,6 +158,15 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 | `ai_route_rule_hits` | `repeated AIRouteRuleHit` | 801 | 命中的 AI 路由规则列表 |
 | `ai_cluster_key_names` | `repeated ClusterKeyName` | 802 | 请求处理过程中尝试过的 (cluster, key) 列表 |
 | `ai_auth_hit_quota_plans` | `repeated string` | 841 | 正常请求时命中的 Quota Plan ID 列表 |
+| `mirror_hit` | `bool` | 842 | 该请求是否被镜像到影子集群（`mod_traffic_mirror`） |
+| `mirror_cluster` | `string` | 843 | 镜像目标集群名，如 `cluster_shadow_v2` |
+| `mirror_status` | `int32` | 844 | 镜像响应状态码；一期为空（异步镜像结果经 Prometheus 上报，不回写访问日志） |
+| `mirror_latency_us` | `int64` | 845 | 镜像请求总延迟（微秒） |
+| `mirror_ttfb_us` | `int64` | 846 | 镜像首字节延迟（微秒，近似 TTFT） |
+| `mirror_prompt_tokens` | `int32` | 847 | 读空镜像响应时解析的 `usage.prompt_tokens` |
+| `mirror_completion_tokens` | `int32` | 848 | 读空镜像响应时解析的 `usage.completion_tokens` |
+| `mirror_finish_reason` | `string` | 849 | 镜像响应 `finish_reason`，如 `stop` / `length` / `content_filter` / `error` |
+| `mirror_error` | `string` | 850 | 镜像响应 OpenAI 错误（type/code，截断存储） |
 
 ## 3. SessionLog（会话日志）
 
