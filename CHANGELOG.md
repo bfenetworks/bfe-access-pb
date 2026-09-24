@@ -5,6 +5,22 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.7]
+
+### Added
+
+- Add AI cache status and cache key fields to `RequestLog`:
+  - `ai_cache_status` (field `789`)
+  - `ai_cache_key` (field `790`)
+
+These optional fields record the `mod_ai_cache` exact-match cache outcome of an AI request: `ai_cache_status` is one of `hit` / `miss` / `skip` (empty when the cache is not enabled), and `ai_cache_key` logs the cache key for debugging only when explicitly enabled.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add `ai_cache_status` field (789) and `ai_cache_key` field (790).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document fields 789 and 790.
+
 ## [v0.3.6]
 
 ### Added
