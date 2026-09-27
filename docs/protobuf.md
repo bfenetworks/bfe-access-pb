@@ -157,6 +157,13 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 | `ai_cache_key` | `string` | 790 | `mod_ai_cache` 缓存键，仅 debug 开启时记录，默认为空，避免日志膨胀 |
 | `ai_route_rule_hits` | `repeated AIRouteRuleHit` | 801 | 命中的 AI 路由规则列表 |
 | `ai_cluster_key_names` | `repeated ClusterKeyName` | 802 | 请求处理过程中尝试过的 (cluster, key) 列表 |
+| `ai_intent_question` | `string` | 803 | `mod_ai_intent` 问题名，如 `task_type`、`complexity` |
+| `ai_intent_answer` | `string` | 804 | `mod_ai_intent` 分类答案（choice 为选中项，score 为档位名），如 `test_writing`；分类失败/超时/低于置信度门控时为 `unknown`（常态结果，必须落日志） |
+| `ai_intent_confidence` | `double` | 805 | 决策服务返回的 answer_confidence（门控后取值） |
+| `ai_intent_source` | `string` | 806 | 答案来源：`explicit_header` / `classifier` / `cache`；未启用意图或分类未触发时为空 |
+| `ai_intent_latency_us` | `int64` | 807 | 决策服务调用耗时（微秒）；cache/显式声明路径为 0 |
+| `ai_intent_cache_hit` | `bool` | 808 | 意图 LRU 缓存是否命中（仅 `source=cache` 时为 true） |
+| `ai_intent_questions_version` | `string` | 809 | 本次分类所用 questions 配置（`intent_questions.data`）的 Version，用于门限标定与配置回滚追溯 |
 | `ai_auth_hit_quota_plans` | `repeated string` | 841 | 正常请求时命中的 Quota Plan ID 列表 |
 | `mirror_hit` | `bool` | 842 | 该请求是否被镜像到影子集群（`mod_traffic_mirror`） |
 | `mirror_cluster` | `string` | 843 | 镜像目标集群名，如 `cluster_shadow_v2` |
