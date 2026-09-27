@@ -5,6 +5,27 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.9]
+
+### Added
+
+- Add AI intent (semantic routing) fields to `RequestLog`:
+  - `ai_intent_question` (field `803`)
+  - `ai_intent_answer` (field `804`)
+  - `ai_intent_confidence` (field `805`)
+  - `ai_intent_source` (field `806`)
+  - `ai_intent_latency_us` (field `807`)
+  - `ai_intent_cache_hit` (field `808`)
+  - `ai_intent_questions_version` (field `809`)
+
+These optional fields record the `mod_ai_intent` semantic routing intent outcome consumed by routing: the question name, classified answer (`unknown` when classification failed/timed out/below the confidence gate), post-gate confidence, answer source (`explicit_header` / `classifier` / `cache`), decision service latency, intent LRU cache hit, and the version of the questions config used. They enable routing audit and confidence-threshold calibration.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add AI intent fields (803-809).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document fields 803-809.
+
 ## [v0.3.8]
 
 ### Added

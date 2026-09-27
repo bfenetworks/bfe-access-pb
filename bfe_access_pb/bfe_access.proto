@@ -412,6 +412,31 @@ message RequestLog {
     // Tried (cluster, key) pairs during request processing
     repeated ClusterKeyName ai_cluster_key_names = 802;
 
+    // Intent (mod_ai_intent) question name, e.g., "task_type", "complexity"
+    optional string ai_intent_question = 803;
+
+    // Intent answer (choice: selected option; score: level name), e.g.,
+    // "test_writing"; "unknown" when classification failed/timed out/below
+    // confidence gate (unknown is a normal outcome and must be logged)
+    optional string ai_intent_answer = 804;
+
+    // Intent answer confidence from the decision service (post-gate value)
+    optional double ai_intent_confidence = 805;
+
+    // Intent answer source: explicit_header / classifier / cache;
+    // empty if intent module disabled or not triggered
+    optional string ai_intent_source = 806;
+
+    // Decision service call latency (microseconds); 0 for cache/explicit paths
+    optional int64 ai_intent_latency_us = 807;
+
+    // Whether the intent LRU cache was hit (true only for source=cache)
+    optional bool ai_intent_cache_hit = 808;
+
+    // Version of the questions config (intent_questions.data) used for this
+    // classification, for threshold calibration and config rollback tracing
+    optional string ai_intent_questions_version = 809;
+
     // 841 - 880: security, compliance and privacy
     // List of hit Quota Plan IDs for successful requests
     repeated string ai_auth_hit_quota_plans = 841;
