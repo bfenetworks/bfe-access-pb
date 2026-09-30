@@ -405,6 +405,14 @@ message RequestLog {
     // AI cache key (mod_ai_cache), only logged when debug enabled; empty by default
     optional string ai_cache_key = 790;
 
+    // AI cache (mod_ai_cache) semantic flag: true when the hit came from the
+    // semantic cache (hit_semantic); empty when exact hit or no semantic lookup
+    optional bool ai_cache_semantic = 791;
+
+    // AI cache (mod_ai_cache) normalized similarity [0,1] of the semantic match
+    // (larger = more similar); empty when no semantic lookup was performed
+    optional double ai_cache_similarity = 792;
+
     // 801 - 840: routing, transformation and plugins
     // Hit AI routing rules
     repeated AIRouteRuleHit ai_route_rule_hits = 801;

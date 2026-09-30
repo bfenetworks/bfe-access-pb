@@ -155,6 +155,8 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 | `ai_cache_write_1h_tokens` | `int64` | 788 | 1h TTL 缓存写入 Token 数，已包含在 `ai_cache_write_tokens` 中 |
 | `ai_cache_status` | `string` | 789 | `mod_ai_cache` 缓存状态：`hit` / `miss` / `skip`；未启用缓存时为空 |
 | `ai_cache_key` | `string` | 790 | `mod_ai_cache` 缓存键，仅 debug 开启时记录，默认为空，避免日志膨胀 |
+| `ai_cache_semantic` | `bool` | 791 | `mod_ai_cache` 语义缓存命中标志：命中来自语义缓存（`hit_semantic`）时为 true；精确命中或未做语义检索时为空 |
+| `ai_cache_similarity` | `double` | 792 | `mod_ai_cache` 语义命中归一化相似度 [0,1]，越大越相似，阈值调优依据；未做语义检索时为空 |
 | `ai_route_rule_hits` | `repeated AIRouteRuleHit` | 801 | 命中的 AI 路由规则列表 |
 | `ai_cluster_key_names` | `repeated ClusterKeyName` | 802 | 请求处理过程中尝试过的 (cluster, key) 列表 |
 | `ai_intent_question` | `string` | 803 | `mod_ai_intent` 问题名，如 `task_type`、`complexity` |
