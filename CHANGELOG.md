@@ -5,6 +5,22 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.10]
+
+### Added
+
+- Add AI cache (mod_ai_cache) semantic caching fields to `RequestLog`:
+  - `ai_cache_semantic` (field `791`)
+  - `ai_cache_similarity` (field `792`)
+
+These optional fields support the second-phase semantic cache of `mod_ai_cache` (embedding + vector similarity lookup): `ai_cache_semantic` marks that the hit was served by the semantic cache (`hit_semantic` status), and `ai_cache_similarity` records the normalized similarity score (larger = more similar) for threshold calibration. Both are empty when no semantic lookup was performed.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add AI cache semantic fields (791-792).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document fields 791-792.
+
 ## [v0.3.9]
 
 ### Added
