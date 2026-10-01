@@ -117,7 +117,7 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 |---|---|
 | 701 - 713 | **已投入使用字段**，保持现状，不再调整 |
 | 714 - 760 | 模型与请求基础信息（model、provider、stream、retry、mode 等） |
-| 761 - 800 | Token、成本、Cache、Audio 与 Image 计量 |
+| 761 - 800 | Token、成本、Cache、Audio、Image 计量与上下文压缩 |
 | 801 - 840 | 路由、转换与插件 |
 | 841 | 安全、合规与隐私（Quota Plan 命中） |
 | 842 - 860 | 流量镜像（mod_traffic_mirror） |
@@ -157,6 +157,10 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 | `ai_cache_key` | `string` | 790 | `mod_ai_cache` 缓存键，仅 debug 开启时记录，默认为空，避免日志膨胀 |
 | `ai_cache_semantic` | `bool` | 791 | `mod_ai_cache` 语义缓存命中标志：命中来自语义缓存（`hit_semantic`）时为 true；精确命中或未做语义检索时为空 |
 | `ai_cache_similarity` | `double` | 792 | `mod_ai_cache` 语义命中归一化相似度 [0,1]，越大越相似，阈值调优依据；未做语义检索时为空 |
+| `ai_context_compress_status` | `string` | 793 | `mod_ai_context` 上下文压缩结果：成功为 `trim`（无损裁剪层产物）/ `rewrite`（改写层产物）；跳过为 `skip_no_rule` / `skip_protocol` / `skip_body_incomplete` / `skip_parse_err` / `skip_under_threshold`；`repair_rollback`（协议修复失败回滚原始请求）；未经该模块处理时为空 |
+| `ai_context_tokens_before` | `int64` | 794 | 上下文压缩前估算 prompt token 数（启发式估算），未经处理时为空 |
+| `ai_context_tokens_after` | `int64` | 795 | 上下文压缩后估算 prompt token 数；未压缩时为空 |
+| `ai_context_compress_mode` | `string` | 796 | 生效的压缩档位：`conservative` / `balanced` / `aggressive`；未压缩时为空 |
 | `ai_route_rule_hits` | `repeated AIRouteRuleHit` | 801 | 命中的 AI 路由规则列表 |
 | `ai_cluster_key_names` | `repeated ClusterKeyName` | 802 | 请求处理过程中尝试过的 (cluster, key) 列表 |
 | `ai_intent_question` | `string` | 803 | `mod_ai_intent` 问题名，如 `task_type`、`complexity` |
