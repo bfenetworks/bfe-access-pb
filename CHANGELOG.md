@@ -5,6 +5,24 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.11]
+
+### Added
+
+- Add AI context compression (mod_ai_context) fields to `RequestLog`:
+  - `ai_context_compress_status` (field `793`)
+  - `ai_context_tokens_before` (field `794`)
+  - `ai_context_tokens_after` (field `795`)
+  - `ai_context_compress_mode` (field `796`)
+
+These optional fields record the `mod_ai_context` context compression and pruning outcome of an AI request: `ai_context_compress_status` is `trim` / `rewrite` on success, `skip_no_rule` / `skip_protocol` / `skip_body_incomplete` / `skip_parse_err` / `skip_under_threshold` when skipped, and `repair_rollback` when protocol repair failed and the original request was forwarded unchanged; `ai_context_tokens_before` / `ai_context_tokens_after` record the heuristic prompt-token estimates before and after compression (empty when not compressed); `ai_context_compress_mode` records the effective mode (`conservative` / `balanced` / `aggressive`). All are empty when the request was not processed by the module.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add AI context compression fields (793-796).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document fields 793-796; extend the 761-800 range description to cover context compression.
+
 ## [v0.3.10]
 
 ### Added

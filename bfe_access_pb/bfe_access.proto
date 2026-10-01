@@ -413,6 +413,21 @@ message RequestLog {
     // (larger = more similar); empty when no semantic lookup was performed
     optional double ai_cache_similarity = 792;
 
+    // AI context compress (mod_ai_context) outcome status: trim / rewrite on
+    // success; skip_no_rule / skip_protocol / skip_body_incomplete /
+    // skip_parse_err / skip_under_threshold / repair_rollback otherwise;
+    // empty if the request was not processed by the module
+    optional string ai_context_compress_status = 793;
+
+    // Estimated prompt tokens before context compression (heuristic estimate)
+    optional int64 ai_context_tokens_before = 794;
+
+    // Estimated prompt tokens after context compression; empty if not compressed
+    optional int64 ai_context_tokens_after = 795;
+
+    // Effective context compression mode: conservative / balanced / aggressive
+    optional string ai_context_compress_mode = 796;
+
     // 801 - 840: routing, transformation and plugins
     // Hit AI routing rules
     repeated AIRouteRuleHit ai_route_rule_hits = 801;
