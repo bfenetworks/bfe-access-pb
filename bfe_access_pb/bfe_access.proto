@@ -460,6 +460,29 @@ message RequestLog {
     // classification, for threshold calibration and config rollback tracing
     optional string ai_intent_questions_version = 809;
 
+    // 810 - 816: upstream error normalization (AIConf.NormalizeUpstreamError)
+    // Original upstream HTTP status code (present when normalization applies)
+    optional int32 ai_upstream_status = 810;
+
+    // Original upstream error code (OpenAI error.code / Anthropic error.type /
+    // Gemini error.status), content redacted when RedactSecrets=true
+    optional string ai_upstream_err_code = 811;
+
+    // Whether the upstream error was rewritten into the unified error body:
+    // true = rewritten, false = passed through (unrecognized or disabled)
+    optional bool ai_err_normalized = 812;
+
+    // Normalization miss marker (parser returned nil); used to complete the
+    // protocol-to-catalog mapping tables
+    optional bool ai_err_normalize_miss = 813;
+
+    // At least one SSE error event of this stream was rewritten (StreamEnabled)
+    optional bool ai_stream_error_rewritten = 814;
+
+    // Stream truncated: EOF without the protocol's terminal event
+    // (StreamEnabled; Gemini streams end at HTTP EOF and never set this)
+    optional bool ai_stream_truncated = 815;
+
     // 841 - 880: security, compliance and privacy
     // List of hit Quota Plan IDs for successful requests
     repeated string ai_auth_hit_quota_plans = 841;

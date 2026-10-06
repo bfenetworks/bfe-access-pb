@@ -5,6 +5,26 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.12]
+
+### Added
+
+- Add upstream error normalization (`AIConf.NormalizeUpstreamError`) fields to `RequestLog`:
+  - `ai_upstream_status` (field `810`)
+  - `ai_upstream_err_code` (field `811`)
+  - `ai_err_normalized` (field `812`)
+  - `ai_err_normalize_miss` (field `813`)
+  - `ai_stream_error_rewritten` (field `814`)
+  - `ai_stream_truncated` (field `815`)
+
+These optional fields record the upstream error normalization outcome of an AI request: `ai_upstream_status` / `ai_upstream_err_code` keep the original upstream HTTP status and error code (OpenAI `error.code` / Anthropic `error.type` / Gemini `error.status`, redacted when `RedactSecrets=true`); `ai_err_normalized` marks whether the upstream error was rewritten into the unified error body (`true`) or passed through (`false`, including unrecognized errors and disabled clusters); `ai_err_normalize_miss` marks normalization misses (parser returned nil) to complete the protocol-to-catalog mapping tables; `ai_stream_error_rewritten` marks that at least one SSE error event of the stream was rewritten (`StreamEnabled`); `ai_stream_truncated` marks a truncated stream (EOF without the protocol's terminal event, `StreamEnabled`; Gemini streams end at HTTP EOF and never set this). All are empty when the cluster does not enable `NormalizeUpstreamError`.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add upstream error normalization fields (810-815).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document fields 810-815.
+
 ## [v0.3.11]
 
 ### Added
