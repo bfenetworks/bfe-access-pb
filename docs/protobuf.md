@@ -107,11 +107,11 @@ enum BfeLogType {
 | `connect_backend_time` | `uint32` | 207 | 连接后端耗时（ms，重试时为最后一次） |
 | `proxy_delay_time` | `uint32` | 208 | BFE 代理延迟耗时（ms） |
 
-### 2.7 AI 可观测性字段（编号 701 - 900）
+### 2.7 AI 可观测性字段（编号 701 - 920）
 
 **编号区间规划**：
 
-protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区间非常宽松。为给 AI 网关后续扩展预留充足空间，将 AI 可观测性字段从 701-800 扩展到 701-900，划分如下：
+protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-920 区间非常宽松。为给 AI 网关后续扩展预留充足空间，将 AI 可观测性字段从 701-800 扩展到 701-900，随批量任务支持（mod_ai_batch）进一步扩展到 701-920，划分如下：
 
 | 编号区间 | 用途 |
 |---|---|
@@ -123,6 +123,7 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 | 842 - 860 | 流量镜像（mod_traffic_mirror） |
 | 861 - 880 | 安全、合规与隐私（预留） |
 | 881 - 900 | 厂商扩展与预留 |
+| 901 - 920 | 批量任务（mod_ai_batch：OpenAI Batch API files/batches） |
 
 | 字段 | 类型 | 编号 | 说明 |
 |------|------|------|------|
@@ -186,6 +187,13 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-900 区
 | `mirror_completion_tokens` | `int32` | 848 | 读空镜像响应时解析的 `usage.completion_tokens` |
 | `mirror_finish_reason` | `string` | 849 | 镜像响应 `finish_reason`，如 `stop` / `length` / `content_filter` / `error` |
 | `mirror_error` | `string` | 850 | 镜像响应 OpenAI 错误（type/code，截断存储） |
+| `ai_batch_id` | `string` | 901 | 批量任务 ID（`batch_xxx`）；file 操作属于已知任务时回填其所属 batch ID |
+| `ai_file_id` | `string` | 902 | 文件 ID（`file-xxx`），files 操作上报 |
+| `ai_batch_op` | `string` | 903 | 批量操作类型：`upload` / `create` / `get` / `list` / `cancel` / `download` |
+| `ai_file_lines` | `int64` | 904 | jsonl 行数：上传时流式计数，或解析批量输出文件所得 |
+| `ai_file_bytes` | `int64` | 905 | 文件字节数：上传计数或 provider 响应值 |
+| `ai_batch_status` | `string` | 906 | provider 批量状态机快照：`validating` / `queued` / `in_progress` / `finalizing` / `completed` / `expired` / `failed` / `cancelled` / `cancelling` |
+| `ai_batch_settle` | `string` | 907 | 配额结算标记：`settle`（按结果文件 usage 结算）/ `release`（预留释放未结算）/ `none` |
 
 ## 3. SessionLog（会话日志）
 
@@ -328,4 +336,4 @@ message ClusterKeyName {
 | 401 - 500 | WAF 预留 |
 | 501 - 600 | 模块信息预留 |
 | 601 - 610 | 通用预留 |
-| 701 - 900 | AI 可观测性字段 |
+| 701 - 920 | AI 可观测性字段 |

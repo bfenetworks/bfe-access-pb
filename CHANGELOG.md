@@ -5,6 +5,27 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.13]
+
+### Added
+
+- Add batch task (mod_ai_batch) fields to `RequestLog`, in the new AI Observability sub-range 901-920 (range extended from 701-900):
+  - `ai_batch_id` (field `901`)
+  - `ai_file_id` (field `902`)
+  - `ai_batch_op` (field `903`)
+  - `ai_file_lines` (field `904`)
+  - `ai_file_bytes` (field `905`)
+  - `ai_batch_status` (field `906`)
+  - `ai_batch_settle` (field `907`)
+
+These optional fields support OpenAI Batch API (`/v1/files`, `/v1/batches`) passthrough observability: `ai_batch_id` / `ai_file_id` identify the batch task and file reported by `mod_ai_batch` (file operations belonging to a known batch backfill their batch ID); `ai_batch_op` records the operation type (`upload` / `create` / `get` / `list` / `cancel` / `download`); `ai_file_lines` / `ai_file_bytes` record the jsonl line count (counted at upload, or parsed from a batch output file) and the file size in bytes; `ai_batch_status` snapshots the provider batch state machine (`validating` / `queued` / `in_progress` / `finalizing` / `completed` / `expired` / `failed` / `cancelled` / `cancelling`); `ai_batch_settle` marks the quota settlement outcome (`settle` = settled by result-file usage, `release` = reserve released without settlement, `none`). All are empty for non-batch traffic.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: extend the AI Observability range header to 701-920; add batch task fields (901-907).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: add sub-range 901-920 (batch tasks, mod_ai_batch) to the range plan; document fields 901-907; update the reserved-range table.
+
 ## [v0.3.12]
 
 ### Added
