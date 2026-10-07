@@ -312,7 +312,7 @@ message RequestLog {
 	reserved 601 to 610;
 
     //------------------------------------------------------------------
-    // AI Observability fields (id: 701 - 900)
+    // AI Observability fields (id: 701 - 920)
     //------------------------------------------------------------------
     // API Key internal ID (e.g. Virtual Key ID), not the raw API Key value
     optional string ai_apikey_id = 701;
@@ -515,6 +515,30 @@ message RequestLog {
 
     // Mirror response OpenAI error (type/code), truncated
     optional string mirror_error = 850;
+
+    // Batch task ID (batch_xxx) reported by mod_ai_batch; set on batch
+    // operations and on file operations belonging to a known batch
+    optional string ai_batch_id = 901;
+
+    // File ID (file-xxx) reported by mod_ai_batch on files operations
+    optional string ai_file_id = 902;
+
+    // Batch operation type: upload / create / get / list / cancel / download
+    optional string ai_batch_op = 903;
+
+    // jsonl line count counted at upload, or parsed from a batch output file
+    optional int64 ai_file_lines = 904;
+
+    // File size in bytes counted at upload or taken from provider response
+    optional int64 ai_file_bytes = 905;
+
+    // Provider batch status snapshot: validating / queued / in_progress /
+    // finalizing / completed / expired / failed / cancelled / cancelling
+    optional string ai_batch_status = 906;
+
+    // Batch quota settlement marker: settle (settled by result-file usage),
+    // release (reserve released without settlement), none
+    optional string ai_batch_settle = 907;
 
 }
 
