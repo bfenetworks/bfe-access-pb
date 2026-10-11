@@ -380,6 +380,15 @@ message RequestLog {
     // requests distinguishable from legitimate zero-cost rows in reconciliation.
     optional bool ai_price_miss = 763;
 
+    // Usage source marker: where the reported token usage came from. "parsed"
+    // (final usage parsed from the upstream response), "estimated" (EstimateToken
+    // estimate approved for billing) or "unrecognized" (no final usage parsed and
+    // not estimatable: billing was skipped and the reported token fields are
+    // auth-time seeding residue). Absent when the upstream call never succeeded
+    // (non-2xx, usage fields suppressed). Set by mod_ai_token_auth; makes billing
+    // bypasses directly queryable in reconciliation (issue #1410).
+    optional string ai_usage_source = 764;
+
     // 781 - 790: cache, audio, image and video metering
     // Number of tokens read from cache
     optional int64 ai_cache_read_tokens = 781;

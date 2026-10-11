@@ -5,6 +5,21 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.15]
+
+### Added
+
+- Add usage source marker field to `RequestLog`:
+  - `ai_usage_source` (field `764`)
+
+This optional field records where the reported token usage came from: `parsed` (final usage parsed from the upstream response, including genuine zero-usage requests), `estimated` (EstimateToken estimate approved for billing, mirrored into the shared usage by the issue #1398 fix), or `unrecognized` (no final usage parsed and the request is not estimatable: billing fields are zeroed, no RMB deduction happens, and the reported token fields are auth-time seeding residue). It is absent when the upstream call never succeeded (non-2xx, where the usage fields are suppressed per the issue #1409 fix). Set by `mod_ai_token_auth` (issue #1410), it closes the observability gap where a billing bypass was indistinguishable from a legitimate zero-usage row (`ai_total_tokens=0`) and where an estimate-billed row was indistinguishable from a parsed-usage row, so billing bypasses become directly queryable in access-log reconciliation and alertable via the module counter instead of relying on out-of-band manual reconciliation.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add `ai_usage_source` field (764).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document field 764.
+
 ## [v0.3.14]
 
 ### Added
