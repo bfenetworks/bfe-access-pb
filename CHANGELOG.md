@@ -5,6 +5,21 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.14]
+
+### Added
+
+- Add price lookup miss marker field to `RequestLog`:
+  - `ai_price_miss` (field `763`)
+
+This optional field marks billing responses whose `(model, mode)` price entry was absent from the cluster price table (`AIConf.ModelTable`). It is set by `mod_ai_token_auth` when the cost is computed by falling back to the model's chat-mode price entry (the issue #1408 fix), and also when no fallback price exists and the request is billed 0. It makes under-priced / zero-cost rows caused by missing price entries distinguishable from legitimate zero-cost rows (e.g. `/count_tokens`, client aborts, pre-pricing traffic) in access-log reconciliation, closing the observability gap where `ai_cost_value` is only written when greater than 0. Empty (unset) for normally priced requests.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add `ai_price_miss` field (763).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document field 763.
+
 ## [v0.3.13]
 
 ### Added

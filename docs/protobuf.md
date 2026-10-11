@@ -146,6 +146,7 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-920 区
 | `ai_protocol` | `string` | 717 | AI 协议风格，如 `openai`、`anthropic` |
 | `ai_cost_value` | `int64` | 761 | 单次请求估算成本（定点整数，精度由 `ai_cost_currency` 决定，如 RMB 为 1e-8 元） |
 | `ai_cost_currency` | `string` | 762 | 成本币种，当前支持 `RMB`、`USD` |
+| `ai_price_miss` | `bool` | 763 | 价格缺失标记：`(model, mode)` 价格条目缺失时置真——成本按该 model 的 chat 价回退计算（或无可回退价格时按 0 计费）。用于对账时把「未定价的低价/0 计费」与合法 0 成本行区分开；由 `mod_ai_token_auth` 置位 |
 | `ai_cache_read_tokens` | `int64` | 781 | 从 cache 读取的 Token 数 |
 | `ai_cache_write_tokens` | `int64` | 782 | 写入 cache 的 Token 数 |
 | `ai_audio_input_tokens` | `int64` | 783 | 音频输入 Token 数，已包含在 `ai_input_tokens` 中 |

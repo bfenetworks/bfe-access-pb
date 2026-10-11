@@ -374,6 +374,12 @@ message RequestLog {
     // Cost currency, currently supports RMB and USD
     optional string ai_cost_currency = 762;
 
+    // Price lookup miss marker: true when the (model, mode) price entry was absent and
+    // the cost was computed by falling back to the model's chat-mode price (or billed 0
+    // when no fallback price exists). Set by mod_ai_token_auth; makes under-priced
+    // requests distinguishable from legitimate zero-cost rows in reconciliation.
+    optional bool ai_price_miss = 763;
+
     // 781 - 790: cache, audio, image and video metering
     // Number of tokens read from cache
     optional int64 ai_cache_read_tokens = 781;
