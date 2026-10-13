@@ -5,6 +5,22 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.16]
+
+### Added
+
+- Add zero-cost reason marker field to `RequestLog`:
+  - `ai_zero_cost_reason` (field `765`)
+
+This optional field records why a 2xx request that holds an RMB quota plan was charged 0: `unrecognized` (upstream usage neither recognized nor estimatable), `aborted` (the client disconnected before the final usage), `cache_hit` (AI cache hit, the upstream was never called), `batch_release` (batch contract released without billing), `price_miss` (no price entry and no fallback), `price_zero` (price entry present but the billed dimensions are priced 0), `model_table_missing` / `config_missing` (pricing configuration unavailable), `no_usage_tokens` (no billable token count although no usage problem was detected) or `cost_zero` (fallback: 0 for an unclassified reason). It is absent when the request was billed, when no RMB plan was bound, or when the upstream call never succeeded. Set by `mod_ai_token_auth` together with the `BillingZeroCost` module counter (issue #1414), it makes every zero-cost 2xx request countable and attributable in access-log reconciliation instead of relying on cross-field heuristics, closing the structural observability gap that the single-branch issue #1410 fix left open: billing bypasses outside the unrecognized-usage branch (batch releases, price tables whose billed dimensions are priced 0, deduction failures, client aborts) used to produce no signal at all.
+
+### Changed
+
+- `ai_usage_source` (field `764`): document the additional `aborted` value, set by `mod_ai_token_auth` when the client disconnects before the final usage is seen (issue #1352 yardstick: no deduction, the token fields are auth-time seeding residue or the initial usage of the stream). The wire format is unchanged, no renumbering.
+- `bfe_access_pb/bfe_access.proto`: add `ai_zero_cost_reason` field (765) and document the `aborted` value of `ai_usage_source`.
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document field 765 and the `aborted` value of field 764.
+
 ## [v0.3.15]
 
 ### Added

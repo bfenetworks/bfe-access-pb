@@ -381,13 +381,36 @@ message RequestLog {
     optional bool ai_price_miss = 763;
 
     // Usage source marker: where the reported token usage came from. "parsed"
-    // (final usage parsed from the upstream response), "estimated" (EstimateToken
-    // estimate approved for billing) or "unrecognized" (no final usage parsed and
-    // not estimatable: billing was skipped and the reported token fields are
-    // auth-time seeding residue). Absent when the upstream call never succeeded
-    // (non-2xx, usage fields suppressed). Set by mod_ai_token_auth; makes billing
-    // bypasses directly queryable in reconciliation (issue #1410).
+    // (final usage parsed from the upstream response, including genuine
+    // zero-usage rows), "estimated" (EstimateToken estimate approved for
+    // billing), "aborted" (the client disconnected before the final usage was
+    // seen: billing is skipped per the issue #1352 yardstick and the reported
+    // token fields are either auth-time seeding residue or the initial usage
+    // of the stream) or "unrecognized" (no final usage parsed and not
+    // estimatable: billing was skipped and the reported token fields are
+    // auth-time seeding residue). Absent when the upstream call never
+    // succeeded (non-2xx, usage fields suppressed). Set by mod_ai_token_auth;
+    // makes billing bypasses directly queryable in reconciliation
+    // (issues #1410, #1414).
     optional string ai_usage_source = 764;
+
+    // Zero-cost reason marker: why a 2xx request holding an RMB quota plan was
+    // charged 0. One of "unrecognized" (usage not recognized and not
+    // estimatable), "aborted" (client disconnected before the final usage),
+    // "cache_hit" (AI cache hit, the upstream was never called),
+    // "batch_release" (batch contract released without billing), "price_miss"
+    // (no price entry and no fallback), "price_zero" (price entry present but
+    // the billed dimensions are priced 0), "model_table_missing" /
+    // "config_missing" (pricing configuration unavailable), "no_usage_tokens"
+    // (no billable token count although no usage problem was detected), or
+    // "cost_zero" (fallback: computed cost is 0 for an unclassified reason).
+    // Absent when the request was billed, when no RMB plan was bound, or when
+    // the upstream call never succeeded. Set by mod_ai_token_auth; it is the
+    // per-request counterpart of the BillingZeroCost module counter and of the
+    // explicit ai_cost_value = 0 written for observed rows, so every zero-cost
+    // 2xx request is countable and attributable in reconciliation
+    // (issue #1414).
+    optional string ai_zero_cost_reason = 765;
 
     // 781 - 790: cache, audio, image and video metering
     // Number of tokens read from cache
