@@ -412,6 +412,24 @@ message RequestLog {
     // (issue #1414).
     optional string ai_zero_cost_reason = 765;
 
+    // Price-miss shape marker: the precise form of a missing-price event for
+    // this request. One of "no_entry" (the (model, mode) price entry is
+    // absent and the cluster action billed 0), "no_baseline" (entry absent
+    // and no chat-mode baseline to fall back to), "fallback" (a non-chat mode
+    // was billed at the model's chat-mode price), "subitem_missing" (the
+    // billed entry lacks sub-item price keys, e.g. cache read/write costs,
+    // used by this request), "no_model_table" (the cluster model table is
+    // missing) or "reject" (the request was rejected before forwarding
+    // because the requested interface has no price configured). The most
+    // specific cause wins when several apply ("subitem_missing" > "fallback"
+    // > "no_entry"/"no_baseline"/"no_model_table"; "reject" is exclusive).
+    // Absent when the request hit no missing-price path. Paired with
+    // ai_price_miss (boolean, field 763): that flag answers "did this happen",
+    // this field answers "in which shape", so reports can group fallback /
+    // zero-billed / rejected / sub-item-missing rows directly (issue #1408
+    // follow-up).
+    optional string ai_price_warn = 766;
+
     // 781 - 790: cache, audio, image and video metering
     // Number of tokens read from cache
     optional int64 ai_cache_read_tokens = 781;

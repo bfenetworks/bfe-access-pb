@@ -5,6 +5,21 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.17]
+
+### Added
+
+- Add price-miss shape marker field to `RequestLog`:
+  - `ai_price_warn` (field `766`)
+
+This optional field records the precise form of a missing-price event: `no_entry` (the `(model, mode)` price entry is absent and the cluster action billed 0), `no_baseline` (entry absent and no chat-mode baseline to fall back to), `fallback` (a non-chat mode was billed at the model's chat-mode price), `subitem_missing` (the billed entry lacks sub-item price keys — e.g. cache read/write costs — that this request actually used), `no_model_table` (the cluster model table is missing) or `reject` (the requested interface has no price configured, so the request was rejected before forwarding). The most specific cause wins when several apply (`subitem_missing` > `fallback` > `no_entry`/`no_baseline`/`no_model_table`; `reject` is exclusive). It pairs with `ai_price_miss` (field `763`): the boolean answers "did a miss happen", this field answers "in which shape", so reconciliation and reports can group fallback-billed / zero-billed / rejected / sub-item-missing rows directly instead of inferring the shape from `ai_cost_value` and `ai_zero_cost_reason` combinations. Values mirror the `type` token of the structured `PRICE_MISS` log line emitted by `mod_ai_token_auth`, keeping logs and access records queryable with one vocabulary.
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add `ai_price_warn` field (766).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document field 766.
+
 ## [v0.3.16]
 
 ### Added
