@@ -539,6 +539,12 @@ message RequestLog {
     // (StreamEnabled; Gemini streams end at HTTP EOF and never set this)
     optional bool ai_stream_truncated = 815;
 
+    // Response fully delivered (the protocol's terminal event was parsed) and
+    // the client then closed the connection without waiting for the HTTP EOF.
+    // Not a client abort and not a write failure: err_code stays empty for
+    // these requests and ERR_CLIENT_WRITE is not incremented (issue #1473)
+    optional bool ai_client_closed_after_complete = 816;
+
     // 841 - 880: security, compliance and privacy
     // List of hit Quota Plan IDs for successful requests
     repeated string ai_auth_hit_quota_plans = 841;
