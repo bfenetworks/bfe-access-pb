@@ -181,6 +181,7 @@ protobuf 字段编号上限为 `2^29 - 1`（约 5.37 亿），因此 701-920 区
 | `ai_err_normalize_miss` | `bool` | 813 | 归一未识别标记（parser 返回 nil 的样本，用于补协议映射表） |
 | `ai_stream_error_rewritten` | `bool` | 814 | 本流至少一个 SSE 错误事件被归一改写（`StreamEnabled` 时） |
 | `ai_stream_truncated` | `bool` | 815 | 流截断：EOF 时缺失协议终止事件（`StreamEnabled` 时；Gemini 流以 HTTP EOF 正常结束，恒不标记） |
+| `ai_client_closed_after_complete` | `bool` | 816 | 响应已完整投递（协议终止事件已解析）后客户端才关闭连接：不是中断、不是写失败，此类请求 `err_code` 为空且不计 `ERR_CLIENT_WRITE`（bfe issue #1473）。非 AI、非流式与正常读到 EOF 的请求恒不出现该字段 |
 | `ai_auth_hit_quota_plans` | `repeated string` | 841 | 正常请求时命中的 Quota Plan ID 列表 |
 | `mirror_hit` | `bool` | 842 | 该请求是否被镜像到影子集群（`mod_traffic_mirror`） |
 | `mirror_cluster` | `string` | 843 | 镜像目标集群名，如 `cluster_shadow_v2` |

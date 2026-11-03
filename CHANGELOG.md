@@ -5,6 +5,21 @@ All notable changes to `bfe-access-pb` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.18]
+
+### Added
+
+- Add client-close-after-complete marker field to `RequestLog`:
+  - `ai_client_closed_after_complete` (field `816`)
+
+This optional field records that the AI streaming response was **fully delivered** (the protocol terminal event — `[DONE]` / `message_stop` / `response.completed` — had already been parsed) and the client then closed the connection without waiting for the HTTP EOF. Such a request is neither a client abort nor a write failure: `err_code` stays empty and `ERR_CLIENT_WRITE` is not incremented for it, so the field is the per-request positive evidence that lets reconciliation and alerting tell "complete, then the client hung up" apart from a real mid-stream abort (`err_code=CLIENT_WRITE`, field absent) and from an upstream drop (`err_code=BK_READ_RESP_BODY`, `ai_usage_source=upstream_dropped`). It pairs with the existing `ai_stream_truncated` (field `815`) inside the same 810-816 upstream-error block: 815 answers "the stream ended without its terminal event", 816 answers "the stream ended normally and the client left right after". Absent for non-AI, non-streaming and normally terminated requests. Set by bfe `bfe_server` (issue #1473).
+
+### Changed
+
+- `bfe_access_pb/bfe_access.proto`: add `ai_client_closed_after_complete` field (816).
+- `bfe_access_pb/bfe_access.pb.go`: regenerate.
+- `docs/protobuf.md`: document field 816.
+
 ## [v0.3.17]
 
 ### Added
